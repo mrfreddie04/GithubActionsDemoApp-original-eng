@@ -1,4 +1,4 @@
-# Learn Git, GitHub y Github Actions
+# Learn Git, GitHub & Github Actions
 
 In this repository you'll find the sample .NET App of the course **Learn Git, GitHub y Github Actions**.
 
