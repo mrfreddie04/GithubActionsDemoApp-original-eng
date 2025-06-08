@@ -13,6 +13,8 @@ env:
   PROJECT: GithubActionsDemoApp/GithubActionsDemoApp.csproj
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Get the code
@@ -34,5 +36,13 @@ jobs:
         with:
           path: ./PublishApp
           name: build
+      - name: Zip publish folder contents
+        run: zip -r myapp.zip ./PublishApp
+      - name: GH Release
+        uses: softprops/action-gh-release@v2.2.2  
+        with:
+          files: ./myapp.zip
+          body: "Our application"
+          tag_name: ${{ github.ref_name }}
 
           
