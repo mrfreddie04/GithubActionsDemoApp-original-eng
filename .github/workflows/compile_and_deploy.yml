@@ -7,7 +7,9 @@ on:
       - 'Tests/**'
       - '.github/workflows/compile_and_deploy.yml'        
     branches:
-      - main      
+      - main  
+    tags:
+      - '*'
 env:
   DOTNET_VERSION: 8.0.x   
   PROJECT: GithubActionsDemoApp/GithubActionsDemoApp.csproj
@@ -31,14 +33,16 @@ jobs:
         run: dotnet test --no-build
       - name: Publish the app
         run: dotnet publish ${{ env.PROJECT }} -c Release -o PublishApp --runtime win-x86
-      - name: Upload a Build Artifact
+      - name: Upload the Build Artifact 
         uses: actions/upload-artifact@v4.6.2
         with:
           path: ./PublishApp
           name: build
       - name: Zip publish folder contents
+        if: startsWith(github.ref_name, '/refs/tags/')
         run: zip -r myapp.zip ./PublishApp
-      - name: GH Release
+      - name: Create GitHub Release
+        if: startsWith(github.ref_name, '/refs/tags/')
         uses: softprops/action-gh-release@v2.2.2  
         with:
           files: ./myapp.zip
