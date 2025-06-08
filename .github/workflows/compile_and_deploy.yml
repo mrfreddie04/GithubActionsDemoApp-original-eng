@@ -2,9 +2,12 @@ name: Compile & Deploy
 on:
   workflow_dispatch:
   push:
+    paths:
+      - 'GithubActionsDemoApp/**'
+      - 'Tests/**'
+      - '.github/workflows/compile_and_deploy.yml'        
     branches:
-      - main
-      
+      - main      
 env:
   DOTNET_VERSION: 8.0.x      
 jobs:
