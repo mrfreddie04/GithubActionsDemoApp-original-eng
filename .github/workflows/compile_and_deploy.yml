@@ -13,6 +13,8 @@ on:
 env:
   DOTNET_VERSION: 8.0.x   
   PROJECT: GithubActionsDemoApp/GithubActionsDemoApp.csproj
+  AZURE_APP_SERVICE_NAME: GithubActionsDemoAppEng
+  AZURE_APP_SERVICE_PACKAGE_LOCATION: '.'
 jobs:
   build:
     permissions:
@@ -25,19 +27,28 @@ jobs:
         uses: actions/setup-dotnet@v4.3.1  
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install EF Core CLI
+        run: dotnet tool install --global dotnet-ef
       - name: Install the dependencies    
         run: dotnet restore
       - name: Compile the app
         run: dotnet build --no-restore
       - name: Run tests
         run: dotnet test --no-build
-      - name: Publish the app
+      - name: Build the app
         run: dotnet publish ${{ env.PROJECT }} -c Release -o PublishApp --runtime win-x86
-      - name: Upload the Build Artifact 
+      - name: Generate migration
+        run: dotnet ef migrations script --idempotent -o migrations.sql --project ${{ env.PROJECT }}
+      - name: Upload the Build Artifact to GH
         uses: actions/upload-artifact@v4.6.2
         with:
           path: ./PublishApp
           name: build
+      - name: Upload the Migration Script Artifact to GH
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          path: ./migrations.sql
+          name: migrations         
       - name: Zip Publish folder contents
         if: startsWith(github.ref, 'refs/tags/')
         run: zip -r myapp.zip ./PublishApp
@@ -48,5 +59,29 @@ jobs:
           files: ./myapp.zip
           body: "Our application"
           tag_name: ${{ github.ref_name }}
-
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: none # we do not need to modify our repo
+  #   needs: [build]
+  #   steps:
+  #     - name: Get the Web App Artifacts
+  #       uses: actions/download-artifact@v4.3.0
+  #       with:
+  #         name: build #refers to the name we assigned to our artifacts in build job
+  #     - name: Get the Migration Scripts Artifacts
+  #       uses: actions/download-artifact@v4.3.0
+  #       with:
+  #         name: migrations
+  #     - name: Deploy to Azure
+  #       uses: Azure/webapps-deploy@v3.0.1
+  #       with:
+  #         app-name: ${{ env.AZURE_APP_SERVICE_NAME }}
+  #         publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+  #         package: ${{ env.AZURE_APP_SERVICE_PACKAGE_LOCATION }}
+  #     - name: Deploy to Azure SQL DB
+  #       uses: Azure/sql-action@v2.2.1
+  #       with:
+  #         connection-string: ${{ secrets.CONNECTION_STRING }}
+  #         path: ./migrations.sql
           
