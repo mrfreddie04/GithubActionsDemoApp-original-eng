@@ -1,4 +1,5 @@
 name: Compile & Deploy
+
 on:
   workflow_dispatch:
   push:
@@ -10,11 +11,13 @@ on:
       - main  
     tags:
       - '*'
+      
 env:
   DOTNET_VERSION: 8.0.x   
   PROJECT: GithubActionsDemoApp/GithubActionsDemoApp.csproj
   AZURE_APP_SERVICE_NAME: GithubActionsDemoAppEng
   AZURE_APP_SERVICE_PACKAGE_LOCATION: '.'
+  
 jobs:
   build:
     permissions:
