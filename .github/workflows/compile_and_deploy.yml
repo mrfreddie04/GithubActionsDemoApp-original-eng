@@ -38,7 +38,7 @@ jobs:
         with:
           path: ./PublishApp
           name: build
-      - name: Zip publish folder contents
+      - name: Zip Publish folder contents
         if: startsWith(${{ github.ref_name }}, '/refs/tags/')
         run: zip -r myapp.zip ./PublishApp
       - name: Create GitHub Release
