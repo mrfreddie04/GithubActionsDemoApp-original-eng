@@ -39,10 +39,10 @@ jobs:
           path: ./PublishApp
           name: build
       - name: Zip Publish folder contents
-        if: startsWith(github.ref, '/refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         run: zip -r myapp.zip ./PublishApp
       - name: Create GitHub Release
-        if: startsWith(github.ref, '/refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2.2.2  
         with:
           files: ./myapp.zip
